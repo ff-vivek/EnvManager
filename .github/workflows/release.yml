@@ -5,6 +5,16 @@ on:
     tags:
       - "v*"
   workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version to publish (defaults to MARKETING_VERSION)"
+        required: false
+        type: string
+      publish_homebrew:
+        description: "Also update the configured Homebrew tap"
+        required: false
+        default: true
+        type: boolean
 
 permissions:
   contents: write
@@ -13,15 +23,22 @@ jobs:
   release:
     runs-on: macos-latest
     env:
+      GH_TOKEN: ${{ github.token }}
       APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
       APPLE_ID: ${{ secrets.APPLE_ID }}
       APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
       DEVELOPER_ID_APPLICATION_P12_BASE64: ${{ secrets.DEVELOPER_ID_APPLICATION_P12_BASE64 }}
       DEVELOPER_ID_APPLICATION_P12_PASSWORD: ${{ secrets.DEVELOPER_ID_APPLICATION_P12_PASSWORD }}
+      HOMEBREW_TAP_REPO: ${{ secrets.HOMEBREW_TAP_REPO }}
+      HOMEBREW_TAP_GH_TOKEN: ${{ secrets.HOMEBREW_TAP_GH_TOKEN }}
+      WORKFLOW_INPUT_VERSION: ${{ github.event.inputs.version }}
+      WORKFLOW_PUBLISH_HOMEBREW: ${{ github.event.inputs.publish_homebrew }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Select Xcode
         uses: maxim-lobanov/setup-xcode@v1
@@ -45,16 +62,23 @@ jobs:
           security list-keychains -d user -s "$KEYCHAIN_PATH"
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "" "$KEYCHAIN_PATH"
 
-      - name: Build, package, and notarize
+      - name: Publish release
         shell: bash
         run: |
           set -euo pipefail
-          VERSION="${GITHUB_REF_NAME#v}"
-          ./scripts/release.sh --version "$VERSION" --output-dir "$RUNNER_TEMP/release"
+          if [[ "${GITHUB_REF_TYPE:-}" == "tag" ]]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          else
+            VERSION="${WORKFLOW_INPUT_VERSION:-}"
+            if [[ -z "$VERSION" ]]; then
+              VERSION="$(./scripts/extract_version.sh)"
+            fi
+          fi
 
-      - name: Upload release artifacts
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            ${{ runner.temp }}/release/*.dmg
-            ${{ runner.temp }}/release/*.sha256
+          ARGS=(--version "$VERSION" --output-dir "$RUNNER_TEMP/release")
+
+          if [[ -z "${HOMEBREW_TAP_REPO:-}" || "${WORKFLOW_PUBLISH_HOMEBREW:-true}" != "true" ]]; then
+            ARGS+=(--skip-homebrew)
+          fi
+
+          ./scripts/publish_release.sh "${ARGS[@]}"

@@ -13,3 +13,5 @@ xcrun notarytool submit "$DMG_PATH" \
   --wait
 
 xcrun stapler staple "$DMG_PATH"
+xcrun stapler validate "$DMG_PATH"
+spctl -a -vv -t open "$DMG_PATH"

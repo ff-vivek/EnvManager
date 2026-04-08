@@ -49,6 +49,15 @@ Each write creates a backup under:
 ~/Library/Application Support/EnvManager/Backups
 ```
 
+## Install
+
+Public releases are intended to ship through:
+
+- GitHub Releases as a notarized `DMG`
+- a Homebrew cask from a user-owned tap
+
+Maintainer-facing release steps live in [RELEASE.md](RELEASE.md) and [docs/public-release-checklist.md](docs/public-release-checklist.md).
+
 ## Project Structure
 
 ```text
@@ -71,14 +80,16 @@ EnvManager/
 ## Development Notes
 
 - The app is intentionally not sandboxed for shell-config file access.
-- There is currently no automated test target.
-- The repository includes a GitHub Actions workflow that verifies the project builds on macOS.
+- Automated integration coverage lives in `EnvManagerTests` and `EnvManagerUITests`.
+- The repository includes GitHub Actions workflows for build verification and tag-based releases.
 
 ## Releasing
 
 The recommended release path is a `Developer ID`-signed, notarized `DMG` distributed outside the Mac App Store.
 
 Release docs are in [RELEASE.md](RELEASE.md).
+
+The repo also includes `./scripts/publish_release.sh` for end-to-end release publication to GitHub Releases and a Homebrew tap.
 
 ## Contributing
 

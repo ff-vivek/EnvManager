@@ -7,6 +7,7 @@ SCHEME="${SCHEME:-EnvManager}"
 OUTPUT_DIR="${OUTPUT_DIR:-$ROOT_DIR/dist/release}"
 VERSION="${VERSION:-}"
 SKIP_NOTARIZE=0
+ALLOW_DIRTY=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -22,6 +23,10 @@ while [[ $# -gt 0 ]]; do
       SKIP_NOTARIZE=1
       shift
       ;;
+    --allow-dirty)
+      ALLOW_DIRTY=1
+      shift
+      ;;
     *)
       echo "Unknown argument: $1" >&2
       exit 1
@@ -32,6 +37,18 @@ done
 if [[ -z "$VERSION" ]]; then
   VERSION="$("$ROOT_DIR/scripts/extract_version.sh")"
 fi
+
+PREFLIGHT_ARGS=(--version "$VERSION" --skip-github-release --skip-homebrew)
+
+if [[ "$SKIP_NOTARIZE" -eq 1 ]]; then
+  PREFLIGHT_ARGS+=(--skip-notarize)
+fi
+
+if [[ "$ALLOW_DIRTY" -eq 1 ]]; then
+  PREFLIGHT_ARGS+=(--allow-dirty)
+fi
+
+"$ROOT_DIR/scripts/release_preflight.sh" "${PREFLIGHT_ARGS[@]}"
 
 ARCHIVE_PATH="$OUTPUT_DIR/$SCHEME.xcarchive"
 EXPORT_DIR="$OUTPUT_DIR/export"
@@ -47,6 +64,10 @@ ARCHIVE_PATH="$ARCHIVE_PATH" "$ROOT_DIR/scripts/archive_app.sh"
 
 echo "==> Exporting Developer ID app"
 ARCHIVE_PATH="$ARCHIVE_PATH" EXPORT_DIR="$EXPORT_DIR" SCHEME="$SCHEME" "$ROOT_DIR/scripts/export_developer_id.sh"
+
+echo "==> Verifying exported app bundle"
+codesign --verify --deep --strict --verbose=2 "$APP_PATH"
+spctl -a -vv -t exec "$APP_PATH"
 
 echo "==> Creating DMG"
 APP_PATH="$APP_PATH" OUTPUT_DMG="$DMG_PATH" VOLUME_NAME="$SCHEME" "$ROOT_DIR/scripts/create_dmg.sh"
