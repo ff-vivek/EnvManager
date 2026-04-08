@@ -2,23 +2,33 @@ import Foundation
 
 class ShellConfigWriter {
 
+    private let fileManager: FileManager
     private let backupDirectory: URL
 
-    init() {
-        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        backupDirectory = appSupport.appendingPathComponent("EnvManager/Backups", isDirectory: true)
+    init(fileManager: FileManager = .default, backupDirectory: URL? = nil) {
+        self.fileManager = fileManager
 
-        try? FileManager.default.createDirectory(at: backupDirectory, withIntermediateDirectories: true)
+        if let backupDirectory {
+            self.backupDirectory = backupDirectory
+        } else if let overrideDirectory = AppEnvironment.backupDirectoryOverrideURL {
+            self.backupDirectory = overrideDirectory
+        } else {
+            let appSupport = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+            self.backupDirectory = appSupport.appendingPathComponent("EnvManager/Backups", isDirectory: true)
+        }
+
+        try? fileManager.createDirectory(at: self.backupDirectory, withIntermediateDirectories: true)
     }
 
     func createBackup(of filePath: String) throws -> URL {
         let fileName = (filePath as NSString).lastPathComponent
+        let visibleFileName = fileName.hasPrefix(".") ? String(fileName.dropFirst()) : fileName
         let timestamp = ISO8601DateFormatter().string(from: Date())
             .replacingOccurrences(of: ":", with: "-")
-        let backupName = "\(fileName)_\(timestamp)"
+        let backupName = "\(visibleFileName)_\(timestamp)"
         let backupURL = backupDirectory.appendingPathComponent(backupName)
 
-        try FileManager.default.copyItem(atPath: filePath, toPath: backupURL.path)
+        try fileManager.copyItem(atPath: filePath, toPath: backupURL.path)
         return backupURL
     }
 
@@ -75,14 +85,14 @@ class ShellConfigWriter {
 
     func writeConfig(_ content: String, to filePath: String, createBackup: Bool = true) throws {
         // Create backup if file exists
-        if createBackup && FileManager.default.fileExists(atPath: filePath) {
+        if createBackup && fileManager.fileExists(atPath: filePath) {
             _ = try self.createBackup(of: filePath)
         }
 
         // Ensure parent directory exists
         let parentDir = (filePath as NSString).deletingLastPathComponent
-        if !FileManager.default.fileExists(atPath: parentDir) {
-            try FileManager.default.createDirectory(atPath: parentDir, withIntermediateDirectories: true)
+        if !fileManager.fileExists(atPath: parentDir) {
+            try fileManager.createDirectory(atPath: parentDir, withIntermediateDirectories: true)
         }
 
         // Write the file
@@ -90,7 +100,7 @@ class ShellConfigWriter {
     }
 
     func createConfigFileIfNeeded(at path: String, shellType: ShellType) throws {
-        if FileManager.default.fileExists(atPath: path) {
+        if fileManager.fileExists(atPath: path) {
             return
         }
 
@@ -120,7 +130,7 @@ class ShellConfigWriter {
     }
 
     func getBackups() -> [URL] {
-        guard let contents = try? FileManager.default.contentsOfDirectory(
+        guard let contents = try? fileManager.contentsOfDirectory(
             at: backupDirectory,
             includingPropertiesForKeys: [.creationDateKey],
             options: [.skipsHiddenFiles]
@@ -137,11 +147,16 @@ class ShellConfigWriter {
 
     func restoreBackup(_ backupURL: URL, to originalPath: String) throws {
         // Backup current before restoring
-        if FileManager.default.fileExists(atPath: originalPath) {
+        if fileManager.fileExists(atPath: originalPath) {
             _ = try createBackup(of: originalPath)
         }
 
-        try FileManager.default.copyItem(at: backupURL, to: URL(fileURLWithPath: originalPath))
+        let destinationURL = URL(fileURLWithPath: originalPath)
+        if fileManager.fileExists(atPath: destinationURL.path) {
+            try fileManager.removeItem(at: destinationURL)
+        }
+
+        try fileManager.copyItem(at: backupURL, to: destinationURL)
     }
 
     enum WriterError: Error, LocalizedError {

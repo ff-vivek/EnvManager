@@ -54,6 +54,7 @@ struct VariableEditorView: View {
                             .foregroundStyle(FloeTheme.inkTertiary)
 
                         TextField("MY_VARIABLE", text: $name)
+                            .accessibilityIdentifier("variable-name-field")
                             .textFieldStyle(.plain)
                             .font(.system(size: 15, weight: .semibold, design: .monospaced))
                             .foregroundStyle(FloeTheme.inkPrimary)
@@ -73,6 +74,7 @@ struct VariableEditorView: View {
                             .foregroundStyle(FloeTheme.inkTertiary)
 
                         TextEditor(text: $value)
+                            .accessibilityIdentifier("variable-value-field")
                             .font(.system(size: 14, weight: .medium, design: .monospaced))
                             .foregroundStyle(FloeTheme.inkPrimary)
                             .scrollContentBackground(.hidden)
@@ -86,6 +88,7 @@ struct VariableEditorView: View {
                             Image(systemName: "exclamationmark.triangle.fill")
                                 .foregroundStyle(FloeTheme.danger)
                             Text(validationMessage)
+                                .accessibilityIdentifier("variable-validation-message")
                                 .font(.system(size: 12, weight: .medium))
                                 .foregroundStyle(FloeTheme.danger)
                         }
@@ -104,27 +107,22 @@ struct VariableEditorView: View {
                             .foregroundStyle(FloeTheme.inkTertiary)
 
                         Text(previewText)
+                            .accessibilityIdentifier("variable-preview-text")
                             .font(.system(size: 13, weight: .semibold, design: .monospaced))
                             .foregroundStyle(FloeTheme.primary)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(.horizontal, 14)
                             .padding(.vertical, 12)
-                            .background(
-                                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                    .fill(FloeTheme.background.opacity(0.94))
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                    .stroke(FloeTheme.border.opacity(0.75), lineWidth: 1)
-                            )
+                            .floeGlassField(cornerRadius: 18)
                     }
                 }
-                .floeCard()
+                .floeCard(fill: FloeTheme.primary.opacity(0.04), border: FloeTheme.border.opacity(0.18), shadow: .elevated)
 
                 HStack {
                     Button("Cancel") {
                         dismiss()
                     }
+                    .accessibilityIdentifier("variable-cancel-button")
                     .buttonStyle(FloeButtonStyle(variant: .ghost))
                     .keyboardShortcut(.cancelAction)
 
@@ -133,6 +131,7 @@ struct VariableEditorView: View {
                     Button(isEditing ? "Save Changes" : "Save Variable") {
                         save()
                     }
+                    .accessibilityIdentifier("variable-save-button")
                     .buttonStyle(FloeButtonStyle(variant: .filled))
                     .keyboardShortcut(.defaultAction)
                     .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
@@ -154,11 +153,8 @@ struct VariableEditorView: View {
 
     private var floeFieldBackground: some View {
         RoundedRectangle(cornerRadius: 18, style: .continuous)
-            .fill(FloeTheme.background.opacity(0.94))
-            .overlay(
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .stroke(FloeTheme.border.opacity(0.75), lineWidth: 1)
-            )
+            .fill(.clear)
+            .floeGlassField(cornerRadius: 18)
     }
 
     private func save() {

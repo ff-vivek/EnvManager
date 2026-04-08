@@ -16,7 +16,7 @@ enum ShellType: String, CaseIterable, Identifiable {
     }
 
     var configFiles: [String] {
-        let home = FileManager.default.homeDirectoryForCurrentUser.path
+        let home = AppEnvironment.homeDirectoryPath
         switch self {
         case .zsh:
             return [
@@ -61,6 +61,12 @@ enum ShellType: String, CaseIterable, Identifiable {
     }
 
     static func detect() -> ShellType {
+        if let override = AppEnvironment.shellOverride?.lowercased() {
+            if override.contains("zsh") { return .zsh }
+            if override.contains("bash") { return .bash }
+            if override.contains("fish") { return .fish }
+        }
+
         if let shell = ProcessInfo.processInfo.environment["SHELL"] {
             if shell.contains("zsh") { return .zsh }
             if shell.contains("bash") { return .bash }

@@ -10,6 +10,7 @@
 		A1000001229A0001 /* EnvManagerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000011229A0001 /* EnvManagerApp.swift */; };
 		A1000002229A0001 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000012229A0001 /* ContentView.swift */; };
 		A1000003229A0001 /* EnvironmentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000013229A0001 /* EnvironmentViewModel.swift */; };
+		B1000001229A0001 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000011229A0001 /* AppEnvironment.swift */; };
 		A1000004229A0001 /* ShellType.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000014229A0001 /* ShellType.swift */; };
 		A1000005229A0001 /* EnvironmentVariable.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000015229A0001 /* EnvironmentVariable.swift */; };
 		A1000006229A0001 /* ShellConfigParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000016229A0001 /* ShellConfigParser.swift */; };
@@ -19,13 +20,33 @@
 		A100000A229A0001 /* PathEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100001A229A0001 /* PathEditorView.swift */; };
 		A100000B229A0001 /* ShellSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100001B229A0001 /* ShellSelectorView.swift */; };
 		A100000C229A0001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A100001C229A0001 /* Assets.xcassets */; };
+		B1000002229A0001 /* EnvironmentIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000013229A0001 /* EnvironmentIntegrationTests.swift */; };
+		B1000003229A0001 /* EnvManagerUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000015229A0001 /* EnvManagerUITests.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		B1000023229A0001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A10000D0229A0001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A10000E0229A0001;
+			remoteInfo = EnvManager;
+		};
+		B1000024229A0001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A10000D0229A0001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A10000E0229A0001;
+			remoteInfo = EnvManager;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		A1000000229A0001 /* EnvManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EnvManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A1000011229A0001 /* EnvManagerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvManagerApp.swift; sourceTree = "<group>"; };
 		A1000012229A0001 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A1000013229A0001 /* EnvironmentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmentViewModel.swift; sourceTree = "<group>"; };
+		B1000011229A0001 /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
 		A1000014229A0001 /* ShellType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellType.swift; sourceTree = "<group>"; };
 		A1000015229A0001 /* EnvironmentVariable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmentVariable.swift; sourceTree = "<group>"; };
 		A1000016229A0001 /* ShellConfigParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellConfigParser.swift; sourceTree = "<group>"; };
@@ -36,10 +57,28 @@
 		A100001B229A0001 /* ShellSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShellSelectorView.swift; sourceTree = "<group>"; };
 		A100001C229A0001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A100001D229A0001 /* EnvManager.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = EnvManager.entitlements; sourceTree = "<group>"; };
+		B1000012229A0001 /* EnvManagerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EnvManagerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B1000013229A0001 /* EnvironmentIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvironmentIntegrationTests.swift; sourceTree = "<group>"; };
+		B1000014229A0001 /* EnvManagerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EnvManagerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B1000015229A0001 /* EnvManagerUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnvManagerUITests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		A10000F0229A0001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B1000025229A0001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B1000026229A0001 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -53,6 +92,8 @@
 			isa = PBXGroup;
 			children = (
 				A1000021229A0001 /* EnvManager */,
+				B1000021229A0001 /* EnvManagerTests */,
+				B1000022229A0001 /* EnvManagerUITests */,
 				A1000022229A0001 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -63,6 +104,7 @@
 				A1000011229A0001 /* EnvManagerApp.swift */,
 				A1000012229A0001 /* ContentView.swift */,
 				A1000013229A0001 /* EnvironmentViewModel.swift */,
+				B1000011229A0001 /* AppEnvironment.swift */,
 				A1000023229A0001 /* Models */,
 				A1000024229A0001 /* Services */,
 				A1000025229A0001 /* Views */,
@@ -76,6 +118,8 @@
 			isa = PBXGroup;
 			children = (
 				A1000000229A0001 /* EnvManager.app */,
+				B1000012229A0001 /* EnvManagerTests.xctest */,
+				B1000014229A0001 /* EnvManagerUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -117,6 +161,22 @@
 			path = Resources;
 			sourceTree = "<group>";
 		};
+		B1000021229A0001 /* EnvManagerTests */ = {
+			isa = PBXGroup;
+			children = (
+				B1000013229A0001 /* EnvironmentIntegrationTests.swift */,
+			);
+			path = EnvManagerTests;
+			sourceTree = "<group>";
+		};
+		B1000022229A0001 /* EnvManagerUITests */ = {
+			isa = PBXGroup;
+			children = (
+				B1000015229A0001 /* EnvManagerUITests.swift */,
+			);
+			path = EnvManagerUITests;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -137,6 +197,42 @@
 			productReference = A1000000229A0001 /* EnvManager.app */;
 			productType = "com.apple.product-type.application";
 		};
+		B1000027229A0001 /* EnvManagerTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B1000031229A0001 /* Build configuration list for PBXNativeTarget "EnvManagerTests" */;
+			buildPhases = (
+				B1000028229A0001 /* Sources */,
+				B1000025229A0001 /* Frameworks */,
+				B1000029229A0001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B1000034229A0001 /* PBXTargetDependency */,
+			);
+			name = EnvManagerTests;
+			productName = EnvManagerTests;
+			productReference = B1000012229A0001 /* EnvManagerTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		B100002A229A0001 /* EnvManagerUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B1000032229A0001 /* Build configuration list for PBXNativeTarget "EnvManagerUITests" */;
+			buildPhases = (
+				B100002B229A0001 /* Sources */,
+				B1000026229A0001 /* Frameworks */,
+				B100002C229A0001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B1000035229A0001 /* PBXTargetDependency */,
+			);
+			name = EnvManagerUITests;
+			productName = EnvManagerUITests;
+			productReference = B1000014229A0001 /* EnvManagerUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -149,6 +245,14 @@
 				TargetAttributes = {
 					A10000E0229A0001 = {
 						CreatedOnToolsVersion = 15.0;
+					};
+					B1000027229A0001 = {
+						CreatedOnToolsVersion = 15.0;
+						TestTargetID = A10000E0229A0001;
+					};
+					B100002A229A0001 = {
+						CreatedOnToolsVersion = 15.0;
+						TestTargetID = A10000E0229A0001;
 					};
 				};
 			};
@@ -166,6 +270,8 @@
 			projectRoot = "";
 			targets = (
 				A10000E0229A0001 /* EnvManager */,
+				B1000027229A0001 /* EnvManagerTests */,
+				B100002A229A0001 /* EnvManagerUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -179,6 +285,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B1000029229A0001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B100002C229A0001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -189,6 +309,7 @@
 				A1000001229A0001 /* EnvManagerApp.swift in Sources */,
 				A1000002229A0001 /* ContentView.swift in Sources */,
 				A1000003229A0001 /* EnvironmentViewModel.swift in Sources */,
+				B1000001229A0001 /* AppEnvironment.swift in Sources */,
 				A1000004229A0001 /* ShellType.swift in Sources */,
 				A1000005229A0001 /* EnvironmentVariable.swift in Sources */,
 				A1000006229A0001 /* ShellConfigParser.swift in Sources */,
@@ -200,7 +321,36 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B1000028229A0001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B1000002229A0001 /* EnvironmentIntegrationTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B100002B229A0001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B1000003229A0001 /* EnvManagerUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		B1000034229A0001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A10000E0229A0001 /* EnvManager */;
+			targetProxy = B1000023229A0001 /* PBXContainerItemProxy */;
+		};
+		B1000035229A0001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A10000E0229A0001 /* EnvManager */;
+			targetProxy = B1000024229A0001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		A10000C0229A0001 /* Debug */ = {
@@ -374,6 +524,80 @@
 			};
 			name = Release;
 		};
+		B100002D229A0001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@loader_path/../Frameworks",
+					"@loader_path/../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.envmanager.EnvManagerTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EnvManager.app/Contents/MacOS/EnvManager";
+				TEST_TARGET_NAME = EnvManager;
+			};
+			name = Debug;
+		};
+		B100002E229A0001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@loader_path/../Frameworks",
+					"@loader_path/../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.envmanager.EnvManagerTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EnvManager.app/Contents/MacOS/EnvManager";
+				TEST_TARGET_NAME = EnvManager;
+			};
+			name = Release;
+		};
+		B100002F229A0001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.envmanager.EnvManagerUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = EnvManager;
+			};
+			name = Debug;
+		};
+		B1000030229A0001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.envmanager.EnvManagerUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = EnvManager;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -391,6 +615,24 @@
 			buildConfigurations = (
 				A10000C2229A0001 /* Debug */,
 				A10000C3229A0001 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B1000031229A0001 /* Build configuration list for PBXNativeTarget "EnvManagerTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B100002D229A0001 /* Debug */,
+				B100002E229A0001 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B1000032229A0001 /* Build configuration list for PBXNativeTarget "EnvManagerUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B100002F229A0001 /* Debug */,
+				B1000030229A0001 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

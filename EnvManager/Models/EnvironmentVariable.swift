@@ -57,6 +57,6 @@ struct ShellConfig: Identifiable {
     }
 
     var displayPath: String {
-        filePath.replacingOccurrences(of: FileManager.default.homeDirectoryForCurrentUser.path, with: "~")
+        AppEnvironment.displayPath(filePath)
     }
 }

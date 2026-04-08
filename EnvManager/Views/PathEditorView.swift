@@ -6,6 +6,7 @@ struct PathEditorView: View {
 
     let variable: EnvironmentVariable
     let onSave: (EnvironmentVariable) -> Void
+    private let onPickFolder: () -> String?
 
     @State private var paths: [PathEntry] = []
     @State private var selectedPath: PathEntry.ID?
@@ -27,9 +28,14 @@ struct PathEditorView: View {
         paths.filter(\.exists).count
     }
 
-    init(variable: EnvironmentVariable, onSave: @escaping (EnvironmentVariable) -> Void) {
+    init(
+        variable: EnvironmentVariable,
+        onSave: @escaping (EnvironmentVariable) -> Void,
+        onPickFolder: @escaping () -> String? = PathEditorView.liveFolderPicker
+    ) {
         self.variable = variable
         self.onSave = onSave
+        self.onPickFolder = onPickFolder
 
         let components = variable.pathComponents.map { PathEntry(path: $0) }
         _paths = State(initialValue: components)
@@ -96,16 +102,10 @@ struct PathEditorView: View {
                         }
                         .onMove(perform: movePaths)
                     }
+                    .accessibilityIdentifier("path-entries-list")
                     .frame(minHeight: 280)
                     .scrollContentBackground(.hidden)
-                    .background(
-                        RoundedRectangle(cornerRadius: 20, style: .continuous)
-                            .fill(FloeTheme.background.opacity(0.92))
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 20, style: .continuous)
-                            .stroke(FloeTheme.border.opacity(0.75), lineWidth: 1)
-                    )
+                    .floeGlassField(cornerRadius: 20)
 
                     HStack(spacing: 12) {
                         Button {
@@ -113,6 +113,7 @@ struct PathEditorView: View {
                         } label: {
                             Label("Add Path", systemImage: "plus")
                         }
+                        .accessibilityIdentifier("path-add-button")
                         .buttonStyle(FloeButtonStyle(variant: .filled, compact: true))
 
                         Button {
@@ -124,6 +125,7 @@ struct PathEditorView: View {
                         } label: {
                             Label("Remove", systemImage: "minus")
                         }
+                        .accessibilityIdentifier("path-remove-button")
                         .buttonStyle(FloeButtonStyle(variant: .danger, compact: true))
                         .disabled(selectedPath == nil)
 
@@ -132,15 +134,17 @@ struct PathEditorView: View {
                         Button("Browse...") {
                             browseForFolder()
                         }
+                        .accessibilityIdentifier("path-browse-button")
                         .buttonStyle(FloeButtonStyle(variant: .soft, compact: true))
                     }
                 }
-                .floeCard()
+                .floeCard(fill: FloeTheme.primary.opacity(0.04), border: FloeTheme.border.opacity(0.18), shadow: .elevated)
 
                 HStack {
                     Button("Cancel") {
                         dismiss()
                     }
+                    .accessibilityIdentifier("path-cancel-button")
                     .buttonStyle(FloeButtonStyle(variant: .ghost))
                     .keyboardShortcut(.cancelAction)
 
@@ -149,6 +153,7 @@ struct PathEditorView: View {
                     Button("Save Path") {
                         save()
                     }
+                    .accessibilityIdentifier("path-save-button")
                     .buttonStyle(FloeButtonStyle(variant: .filled))
                     .keyboardShortcut(.defaultAction)
                 }
@@ -157,12 +162,12 @@ struct PathEditorView: View {
         }
         .frame(width: 640, height: 640)
         .sheet(isPresented: $showAddSheet) {
-            AddPathSheet(newPath: $newPath) {
+            AddPathSheet(newPath: $newPath, onAdd: {
                 if !newPath.isEmpty {
                     paths.append(PathEntry(path: newPath))
                     newPath = ""
                 }
-            }
+            }, onPickFolder: onPickFolder)
         }
     }
 
@@ -171,13 +176,8 @@ struct PathEditorView: View {
     }
 
     private func browseForFolder() {
-        let panel = NSOpenPanel()
-        panel.canChooseFiles = false
-        panel.canChooseDirectories = true
-        panel.allowsMultipleSelection = false
-
-        if panel.runModal() == .OK, let url = panel.url {
-            paths.append(PathEntry(path: url.path))
+        if let path = onPickFolder() {
+            paths.append(PathEntry(path: path))
         }
     }
 
@@ -188,6 +188,19 @@ struct PathEditorView: View {
         onSave(updatedVariable)
         dismiss()
     }
+
+    private static func liveFolderPicker() -> String? {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        panel.allowsMultipleSelection = false
+
+        guard panel.runModal() == .OK, let url = panel.url else {
+            return nil
+        }
+
+        return url.path
+    }
 }
 
 struct PathRowView: View {
@@ -196,9 +209,17 @@ struct PathRowView: View {
     var body: some View {
         HStack(spacing: 12) {
             ZStack {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill((entry.exists ? FloeTheme.secondary : FloeTheme.accent).opacity(0.16))
+                Circle()
+                    .fill(.thinMaterial)
                     .frame(width: 34, height: 34)
+                    .overlay(
+                        Circle()
+                            .fill((entry.exists ? FloeTheme.secondary : FloeTheme.accent).opacity(0.18))
+                    )
+                    .overlay(
+                        Circle()
+                            .stroke(.white.opacity(0.22), lineWidth: 0.8)
+                    )
 
                 Image(systemName: entry.exists ? "folder.fill" : "folder.badge.questionmark")
                     .foregroundStyle(entry.exists ? FloeTheme.secondary : FloeTheme.accent)
@@ -206,6 +227,7 @@ struct PathRowView: View {
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(entry.path)
+                    .accessibilityIdentifier("path-entry-\(entry.path)")
                     .font(.system(size: 13, weight: .semibold, design: .monospaced))
                     .foregroundStyle(FloeTheme.inkPrimary)
                     .lineLimit(1)
@@ -220,6 +242,7 @@ struct PathRowView: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
+        .floeGlassField(cornerRadius: 16)
     }
 }
 
@@ -227,6 +250,7 @@ struct AddPathSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var newPath: String
     let onAdd: () -> Void
+    let onPickFolder: () -> String?
 
     var body: some View {
         ZStack {
@@ -244,43 +268,36 @@ struct AddPathSheet: View {
                 }
 
                 TextField("Path", text: $newPath)
+                    .accessibilityIdentifier("new-path-field")
                     .textFieldStyle(.plain)
                     .font(.system(size: 14, weight: .medium, design: .monospaced))
                     .foregroundStyle(FloeTheme.inkPrimary)
                     .padding(.horizontal, 14)
                     .padding(.vertical, 12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 18, style: .continuous)
-                            .fill(FloeTheme.background.opacity(0.94))
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 18, style: .continuous)
-                            .stroke(FloeTheme.border.opacity(0.75), lineWidth: 1)
-                    )
+                    .floeGlassField(cornerRadius: 18)
 
                 HStack {
                     Button("Cancel") {
                         dismiss()
                     }
+                    .accessibilityIdentifier("new-path-cancel-button")
                     .buttonStyle(FloeButtonStyle(variant: .ghost))
 
                     Spacer(minLength: 0)
 
                     Button("Browse...") {
-                        let panel = NSOpenPanel()
-                        panel.canChooseFiles = false
-                        panel.canChooseDirectories = true
-
-                        if panel.runModal() == .OK, let url = panel.url {
-                            newPath = url.path
+                        if let path = onPickFolder() {
+                            newPath = path
                         }
                     }
+                    .accessibilityIdentifier("new-path-browse-button")
                     .buttonStyle(FloeButtonStyle(variant: .soft))
 
                     Button("Add") {
                         onAdd()
                         dismiss()
                     }
+                    .accessibilityIdentifier("new-path-add-button")
                     .buttonStyle(FloeButtonStyle(variant: .filled))
                     .disabled(newPath.isEmpty)
                 }

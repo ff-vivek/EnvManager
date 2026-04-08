@@ -2,7 +2,7 @@ import SwiftUI
 import AppKit
 
 struct ContentView: View {
-    @StateObject private var viewModel = EnvironmentViewModel()
+    @StateObject private var viewModel: EnvironmentViewModel
 
     @State private var selectedUserVariable: EnvironmentVariable?
     @State private var selectedSystemVariable: EnvironmentVariable?
@@ -15,6 +15,16 @@ struct ContentView: View {
 
     @State private var variableToEdit: EnvironmentVariable?
     @State private var pathVariableToEdit: EnvironmentVariable?
+
+    @MainActor
+    init(viewModel: EnvironmentViewModel) {
+        _viewModel = StateObject(wrappedValue: viewModel)
+    }
+
+    @MainActor
+    init() {
+        _viewModel = StateObject(wrappedValue: EnvironmentViewModel())
+    }
 
     private var filteredUserVariables: [EnvironmentVariable] {
         filterVariables(viewModel.userVariables)
@@ -111,7 +121,7 @@ struct ContentView: View {
                         Text("EnvManager")
                             .font(.system(size: 30, weight: .bold, design: .rounded))
                             .foregroundStyle(FloeTheme.inkPrimary)
-                        Text("A calmer shell-variable workspace inspired by FloeKit's soft surfaces, spacing, and elevated controls.")
+                        Text("A glassy shell-variable workspace with floating controls, translucent panels, and safer dotfile edits.")
                             .font(.system(size: 14, weight: .medium))
                             .foregroundStyle(FloeTheme.inkSecondary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -126,7 +136,7 @@ struct ContentView: View {
                     )
                     FloeInfoPill(
                         title: viewModel.currentConfig?.displayPath ?? viewModel.selectedConfigFile.replacingOccurrences(
-                            of: FileManager.default.homeDirectoryForCurrentUser.path,
+                            of: AppEnvironment.homeDirectoryPath,
                             with: "~"
                         ),
                         systemImage: "doc.text",
@@ -148,6 +158,7 @@ struct ContentView: View {
                 } label: {
                     Label("New Variable", systemImage: "plus")
                 }
+                .accessibilityIdentifier("header-new-variable-button")
                 .buttonStyle(FloeButtonStyle(variant: .filled))
 
                 Button {
@@ -155,11 +166,12 @@ struct ContentView: View {
                 } label: {
                     Label("Preview", systemImage: "doc.richtext")
                 }
+                .accessibilityIdentifier("header-preview-button")
                 .buttonStyle(FloeButtonStyle(variant: .soft))
                 .disabled(!viewModel.hasUnsavedChanges)
             }
         }
-        .floeCard(fill: FloeTheme.surface.opacity(0.96), shadow: .elevated)
+        .floeCard(fill: FloeTheme.primary.opacity(0.05), border: FloeTheme.border.opacity(0.18), shadow: .elevated)
     }
 
     private var metrics: some View {
@@ -212,12 +224,13 @@ struct ContentView: View {
             }
 
             HStack(spacing: 12) {
-                FloeSearchField(text: $searchText)
+                FloeSearchField(text: $searchText, accessibilityIdentifier: "variable-search-field")
                 Button {
                     showingAddSheet = true
                 } label: {
                     Label("New", systemImage: "plus")
                 }
+                .accessibilityIdentifier("user-variables-new-button")
                 .buttonStyle(FloeButtonStyle(variant: .filled, compact: true))
 
                 Button {
@@ -225,6 +238,7 @@ struct ContentView: View {
                 } label: {
                     Label("Edit", systemImage: "pencil")
                 }
+                .accessibilityIdentifier("user-variables-edit-button")
                 .buttonStyle(FloeButtonStyle(variant: .soft, compact: true))
                 .disabled(selectedUserVariable == nil)
 
@@ -235,6 +249,7 @@ struct ContentView: View {
                 } label: {
                     Label("Delete", systemImage: "trash")
                 }
+                .accessibilityIdentifier("user-variables-delete-button")
                 .buttonStyle(FloeButtonStyle(variant: .danger, compact: true))
                 .disabled(selectedUserVariable == nil)
             }
@@ -256,6 +271,7 @@ struct ContentView: View {
                                 .foregroundStyle(variable.isPath ? FloeTheme.accent : FloeTheme.primary)
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(variable.name)
+                                    .accessibilityIdentifier("user-variable-\(variable.name)")
                                     .font(.system(size: 13, weight: .semibold))
                                     .foregroundStyle(FloeTheme.inkPrimary)
                                 Text(variable.isPath ? "Path-aware variable" : "Standard export")
@@ -283,6 +299,7 @@ struct ContentView: View {
                     }
                     .width(min: 100, ideal: 120, max: 140)
                 }
+                .accessibilityIdentifier("user-variables-table")
                 .tableStyle(.bordered)
                 .frame(minHeight: 250)
             }
@@ -331,12 +348,14 @@ struct ContentView: View {
 
                     TableColumn("Value") { variable in
                         Text(variable.value)
+                            .accessibilityIdentifier("system-variable-\(variable.name)")
                             .font(.system(.body, design: .monospaced))
                             .lineLimit(1)
                             .truncationMode(.middle)
                             .foregroundStyle(FloeTheme.inkSecondary)
                     }
                 }
+                .accessibilityIdentifier("system-variables-table")
                 .tableStyle(.bordered)
                 .frame(minHeight: 190)
             }
@@ -364,22 +383,25 @@ struct ContentView: View {
             Button("Reload") {
                 viewModel.loadConfiguration()
             }
+            .accessibilityIdentifier("reload-button")
             .buttonStyle(FloeButtonStyle(variant: .ghost))
 
             Button("Preview Changes") {
                 showingPreview = true
             }
+            .accessibilityIdentifier("preview-changes-button")
             .buttonStyle(FloeButtonStyle(variant: .soft))
             .disabled(!viewModel.hasUnsavedChanges)
 
             Button("Apply") {
                 applyChanges()
             }
+            .accessibilityIdentifier("apply-changes-button")
             .buttonStyle(FloeButtonStyle(variant: .filled))
             .keyboardShortcut(.defaultAction)
             .disabled(!viewModel.hasUnsavedChanges)
         }
-        .floeCard(fill: FloeTheme.surface.opacity(0.92), shadow: .soft)
+        .floeCard(fill: FloeTheme.secondary.opacity(0.04), border: FloeTheme.border.opacity(0.18), shadow: .soft)
     }
 
     @ViewBuilder
@@ -424,10 +446,7 @@ struct ContentView: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
-        .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(FloeTheme.background.opacity(0.92))
-        )
+        .floeGlassField(cornerRadius: 16)
     }
 
     private func filterVariables(_ variables: [EnvironmentVariable]) -> [EnvironmentVariable] {
@@ -500,6 +519,7 @@ struct PreviewChangesView: View {
 
                 ScrollView {
                     Text(viewModel.previewChanges())
+                        .accessibilityIdentifier("preview-changes-text")
                         .font(.system(.body, design: .monospaced))
                         .foregroundStyle(FloeTheme.inkPrimary)
                         .textSelection(.enabled)
@@ -507,19 +527,13 @@ struct PreviewChangesView: View {
                         .padding(18)
                 }
                 .frame(minHeight: 260)
-                .background(
-                    RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .fill(FloeTheme.background.opacity(0.98))
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .stroke(FloeTheme.border.opacity(0.7), lineWidth: 1)
-                )
+                .floeGlassField(cornerRadius: 20)
 
                 HStack {
                     Button("Cancel") {
                         dismiss()
                     }
+                    .accessibilityIdentifier("preview-cancel-button")
                     .buttonStyle(FloeButtonStyle(variant: .ghost))
                     .keyboardShortcut(.cancelAction)
 
@@ -529,6 +543,7 @@ struct PreviewChangesView: View {
                         onApply()
                         dismiss()
                     }
+                    .accessibilityIdentifier("preview-apply-button")
                     .buttonStyle(FloeButtonStyle(variant: .filled))
                     .keyboardShortcut(.defaultAction)
                 }
@@ -540,42 +555,57 @@ struct PreviewChangesView: View {
 }
 
 enum FloeTheme {
-    static let primary = Color(light: (0.220, 0.471, 0.980), dark: (0.290, 0.565, 1.000))
-    static let secondary = Color(light: (0.180, 0.800, 0.443), dark: (0.153, 0.682, 0.376))
-    static let accent = Color(light: (0.980, 0.671, 0.220), dark: (0.922, 0.584, 0.196))
-    static let danger = Color(light: (0.922, 0.318, 0.318), dark: (0.996, 0.463, 0.463))
+    static let primary = Color(light: (0.365, 0.557, 0.996), dark: (0.529, 0.678, 1.000))
+    static let secondary = Color(light: (0.251, 0.784, 0.651), dark: (0.404, 0.867, 0.741))
+    static let accent = Color(light: (0.976, 0.737, 0.333), dark: (1.000, 0.803, 0.475))
+    static let danger = Color(light: (0.932, 0.388, 0.431), dark: (1.000, 0.545, 0.580))
 
-    static let background = Color(light: (0.973, 0.980, 1.000), dark: (0.071, 0.071, 0.071))
-    static let surface = Color(light: (0.922, 0.941, 0.980), dark: (0.110, 0.110, 0.118))
-    static let border = Color(light: (0.898, 0.898, 0.918), dark: (0.227, 0.227, 0.235))
+    static let background = Color(light: (0.945, 0.965, 1.000), dark: (0.055, 0.067, 0.106))
+    static let surface = Color(light: (0.955, 0.972, 1.000), dark: (0.118, 0.133, 0.192))
+    static let border = Color(light: (1.000, 1.000, 1.000), dark: (0.825, 0.867, 0.980))
+    static let chrome = Color(light: (0.843, 0.898, 1.000), dark: (0.251, 0.333, 0.541))
+    static let glassTint = Color(light: (0.878, 0.925, 1.000), dark: (0.145, 0.173, 0.255))
+    static let glassShadow = Color(light: (0.208, 0.333, 0.569), dark: (0.000, 0.000, 0.000))
 
-    static let inkPrimary = Color(light: (0.120, 0.157, 0.235), dark: (0.952, 0.957, 0.975))
-    static let inkSecondary = Color(light: (0.403, 0.447, 0.525), dark: (0.683, 0.702, 0.761))
-    static let inkTertiary = Color(light: (0.545, 0.584, 0.655), dark: (0.510, 0.533, 0.584))
+    static let inkPrimary = Color(light: (0.098, 0.153, 0.255), dark: (0.963, 0.975, 1.000))
+    static let inkSecondary = Color(light: (0.337, 0.420, 0.565), dark: (0.682, 0.749, 0.886))
+    static let inkTertiary = Color(light: (0.506, 0.584, 0.733), dark: (0.561, 0.627, 0.769))
 
     static var pageBackground: some View {
         ZStack {
             LinearGradient(
                 colors: [
                     background,
-                    surface.opacity(0.82),
-                    primary.opacity(0.08)
+                    surface.opacity(0.72),
+                    chrome.opacity(0.44)
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
             )
 
             Circle()
-                .fill(primary.opacity(0.08))
-                .frame(width: 320, height: 320)
-                .blur(radius: 10)
-                .offset(x: -240, y: -220)
+                .fill(primary.opacity(0.20))
+                .frame(width: 420, height: 420)
+                .blur(radius: 38)
+                .offset(x: -250, y: -260)
 
             Circle()
-                .fill(accent.opacity(0.08))
+                .fill(accent.opacity(0.16))
+                .frame(width: 300, height: 300)
+                .blur(radius: 42)
+                .offset(x: 250, y: 230)
+
+            Circle()
+                .fill(secondary.opacity(0.18))
                 .frame(width: 260, height: 260)
-                .blur(radius: 18)
-                .offset(x: 260, y: 220)
+                .blur(radius: 34)
+                .offset(x: 320, y: -180)
+
+            Rectangle()
+                .fill(.white.opacity(0.12))
+                .frame(height: 1)
+                .blur(radius: 1.5)
+                .offset(y: -230)
         }
     }
 }
@@ -611,18 +641,27 @@ enum FloeShadowStyle {
 }
 
 struct FloeCardModifier: ViewModifier {
-    var fill: Color = FloeTheme.surface.opacity(0.94)
-    var border: Color = FloeTheme.border.opacity(0.75)
+    var fill: Color = FloeTheme.glassTint.opacity(0.16)
+    var border: Color = FloeTheme.border.opacity(0.24)
     var shadow: FloeShadowStyle = .soft
 
     func body(content: Content) -> some View {
         content
             .padding(20)
-            .background(
+            .background {
                 RoundedRectangle(cornerRadius: 26, style: .continuous)
-                    .fill(fill)
-                    .shadow(color: .black.opacity(shadow.opacity), radius: shadow.radius, x: 0, y: shadow.yOffset)
-            )
+                    .fill(.ultraThinMaterial)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 26, style: .continuous)
+                            .fill(fill)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 26, style: .continuous)
+                            .stroke(.white.opacity(0.24), lineWidth: 0.9)
+                            .blur(radius: 0.2)
+                    )
+                    .shadow(color: FloeTheme.glassShadow.opacity(shadow.opacity), radius: shadow.radius, x: 0, y: shadow.yOffset)
+            }
             .overlay(
                 RoundedRectangle(cornerRadius: 26, style: .continuous)
                     .stroke(border, lineWidth: 1)
@@ -637,6 +676,25 @@ extension View {
         shadow: FloeShadowStyle = .soft
     ) -> some View {
         modifier(FloeCardModifier(fill: fill, border: border, shadow: shadow))
+    }
+
+    func floeGlassField(cornerRadius: CGFloat = 18) -> some View {
+        background {
+            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                .fill(.thinMaterial)
+                .overlay(
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .fill(FloeTheme.glassTint.opacity(0.18))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                        .stroke(.white.opacity(0.22), lineWidth: 0.8)
+                )
+        }
+        .overlay(
+            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                .stroke(FloeTheme.chrome.opacity(0.18), lineWidth: 1)
+        )
     }
 }
 
@@ -657,34 +715,55 @@ struct FloeButtonStyle: ButtonStyle {
             .foregroundStyle(foregroundColor)
             .padding(.horizontal, compact ? 14 : 18)
             .padding(.vertical, compact ? 9 : 12)
-            .background(
-                RoundedRectangle(cornerRadius: compact ? 15 : 18, style: .continuous)
-                    .fill(backgroundColor.opacity(configuration.isPressed ? 0.88 : 1.0))
+            .background {
+                RoundedRectangle(cornerRadius: compact ? 17 : 20, style: .continuous)
+                    .fill(.thinMaterial)
                     .overlay(
-                        RoundedRectangle(cornerRadius: compact ? 15 : 18, style: .continuous)
-                            .stroke(borderColor, lineWidth: borderWidth)
+                        RoundedRectangle(cornerRadius: compact ? 17 : 20, style: .continuous)
+                            .fill(backgroundColor.opacity(configuration.isPressed ? 0.76 : 1.0))
                     )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: compact ? 17 : 20, style: .continuous)
+                            .stroke(.white.opacity(0.22), lineWidth: 0.9)
+                    )
+            }
+            .overlay(
+                RoundedRectangle(cornerRadius: compact ? 17 : 20, style: .continuous)
+                    .stroke(borderColor, lineWidth: borderWidth)
             )
             .shadow(
                 color: shadowColor.opacity(configuration.isPressed ? 0.08 : 0.14),
-                radius: configuration.isPressed ? 6 : 10,
+                radius: configuration.isPressed ? 8 : 16,
                 x: 0,
-                y: configuration.isPressed ? 2 : 5
+                y: configuration.isPressed ? 3 : 8
             )
-            .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
+            .overlay(alignment: .top) {
+                RoundedRectangle(cornerRadius: compact ? 17 : 20, style: .continuous)
+                    .fill(
+                        LinearGradient(
+                            colors: [.white.opacity(configuration.isPressed ? 0.06 : 0.20), .white.opacity(0.02)],
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                    )
+                    .mask(
+                        RoundedRectangle(cornerRadius: compact ? 17 : 20, style: .continuous)
+                    )
+            }
+            .scaleEffect(configuration.isPressed ? 0.985 : 1.0)
             .animation(.spring(response: 0.22, dampingFraction: 0.82), value: configuration.isPressed)
     }
 
     private var backgroundColor: Color {
         switch variant {
         case .filled:
-            return FloeTheme.primary
+            return FloeTheme.primary.opacity(0.74)
         case .soft:
-            return FloeTheme.surface.opacity(0.9)
+            return FloeTheme.surface.opacity(0.30)
         case .ghost:
-            return FloeTheme.background.opacity(0.75)
+            return FloeTheme.glassTint.opacity(0.10)
         case .danger:
-            return FloeTheme.danger.opacity(0.12)
+            return FloeTheme.danger.opacity(0.20)
         }
     }
 
@@ -702,20 +781,20 @@ struct FloeButtonStyle: ButtonStyle {
     private var borderColor: Color {
         switch variant {
         case .filled:
-            return FloeTheme.primary.opacity(0.2)
+            return FloeTheme.primary.opacity(0.18)
         case .soft, .ghost:
-            return FloeTheme.border
+            return FloeTheme.border.opacity(0.18)
         case .danger:
-            return FloeTheme.danger.opacity(0.24)
+            return FloeTheme.danger.opacity(0.22)
         }
     }
 
     private var borderWidth: CGFloat {
         switch variant {
-        case .ghost:
+        case .ghost, .soft:
             return 1
         default:
-            return 0
+            return 0.9
         }
     }
 
@@ -741,9 +820,17 @@ struct FloeMetricCard: View {
     var body: some View {
         HStack(alignment: .top, spacing: 14) {
             ZStack {
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(tint.opacity(0.12))
+                Circle()
+                    .fill(.thinMaterial)
                     .frame(width: 46, height: 46)
+                    .overlay(
+                        Circle()
+                            .fill(tint.opacity(0.18))
+                    )
+                    .overlay(
+                        Circle()
+                            .stroke(.white.opacity(0.26), lineWidth: 0.8)
+                    )
 
                 Image(systemName: systemImage)
                     .font(.system(size: 18, weight: .semibold))
@@ -766,7 +853,7 @@ struct FloeMetricCard: View {
             Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .floeCard(fill: FloeTheme.surface.opacity(0.92), shadow: .subtle)
+        .floeCard(fill: tint.opacity(0.08), border: tint.opacity(0.12), shadow: .subtle)
     }
 }
 
@@ -781,9 +868,17 @@ struct FloeInfoPill: View {
             .foregroundStyle(tint)
             .padding(.horizontal, 12)
             .padding(.vertical, 7)
-            .background(
+            .background {
                 Capsule(style: .continuous)
-                    .fill(tint.opacity(0.12))
+                    .fill(.thinMaterial)
+                    .overlay(
+                        Capsule(style: .continuous)
+                            .fill(tint.opacity(0.12))
+                    )
+            }
+            .overlay(
+                Capsule(style: .continuous)
+                    .stroke(.white.opacity(0.22), lineWidth: 0.8)
             )
             .overlay(
                 Capsule(style: .continuous)
@@ -813,25 +908,20 @@ struct FloeEmptyState: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 30)
-        .background(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(FloeTheme.background.opacity(0.9))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .stroke(FloeTheme.border.opacity(0.75), lineWidth: 1)
-        )
+        .floeGlassField(cornerRadius: 20)
     }
 }
 
 struct FloeSearchField: View {
     @Binding var text: String
+    var accessibilityIdentifier: String = ""
 
     var body: some View {
         HStack(spacing: 10) {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(FloeTheme.inkTertiary)
             TextField("Search variables or values", text: $text)
+                .accessibilityIdentifier(accessibilityIdentifier)
                 .textFieldStyle(.plain)
                 .font(.system(size: 13, weight: .medium))
                 .foregroundStyle(FloeTheme.inkPrimary)
@@ -848,14 +938,7 @@ struct FloeSearchField: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
-        .background(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(FloeTheme.background.opacity(0.94))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .stroke(FloeTheme.border.opacity(0.75), lineWidth: 1)
-        )
+        .floeGlassField(cornerRadius: 18)
     }
 }
 
@@ -867,14 +950,23 @@ struct FloeSelectableChipStyle: ButtonStyle {
             .foregroundStyle(isSelected ? .white : FloeTheme.inkPrimary)
             .padding(.horizontal, 14)
             .padding(.vertical, 10)
-            .background(
+            .background {
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
-                    .fill(isSelected ? FloeTheme.primary : FloeTheme.background.opacity(0.95))
+                    .fill(.thinMaterial)
                     .overlay(
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .stroke(isSelected ? FloeTheme.primary.opacity(0.2) : FloeTheme.border, lineWidth: 1)
+                            .fill(isSelected ? FloeTheme.primary.opacity(0.74) : FloeTheme.glassTint.opacity(0.10))
                     )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .stroke(.white.opacity(0.22), lineWidth: 0.8)
+                    )
+            }
+            .overlay(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .stroke(isSelected ? FloeTheme.primary.opacity(0.24) : FloeTheme.border.opacity(0.16), lineWidth: 1)
             )
+            .shadow(color: FloeTheme.glassShadow.opacity(configuration.isPressed ? 0.06 : 0.12), radius: configuration.isPressed ? 8 : 14, x: 0, y: configuration.isPressed ? 3 : 8)
             .scaleEffect(configuration.isPressed ? 0.98 : 1.0)
             .animation(.spring(response: 0.2, dampingFraction: 0.82), value: configuration.isPressed)
     }

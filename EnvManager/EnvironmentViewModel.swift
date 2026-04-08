@@ -25,16 +25,25 @@ class EnvironmentViewModel: ObservableObject {
     @Published var currentConfig: ShellConfig?
     @Published var hasUnsavedChanges = false
 
-    private let parser = ShellConfigParser()
-    private let writer = ShellConfigWriter()
+    private let parser: ShellConfigParser
+    private let writer: ShellConfigWriter
 
     private var pendingAdditions: [EnvironmentVariable] = []
     private var pendingUpdates: [EnvironmentVariable] = []
     private var pendingDeletions: [EnvironmentVariable] = []
 
-    init() {
-        selectedShell = ShellType.detect()
-        selectedConfigFile = selectedShell.primaryConfigFile
+    init(
+        parser: ShellConfigParser = ShellConfigParser(),
+        writer: ShellConfigWriter = ShellConfigWriter(),
+        initialShell: ShellType? = nil,
+        initialConfigFile: String? = nil
+    ) {
+        self.parser = parser
+        self.writer = writer
+
+        let resolvedShell = initialShell ?? ShellType.detect()
+        selectedShell = resolvedShell
+        selectedConfigFile = initialConfigFile ?? resolvedShell.primaryConfigFile
     }
 
     func loadConfiguration() {
@@ -153,18 +162,24 @@ class EnvironmentViewModel: ObservableObject {
     }
 
     func saveChanges() throws {
-        guard let config = currentConfig else {
+        guard currentConfig != nil else {
             throw SaveError.noConfiguration
         }
 
+        let configPreviouslyExisted = FileManager.default.fileExists(atPath: selectedConfigFile)
+
         // Create config file if needed
         try writer.createConfigFileIfNeeded(at: selectedConfigFile, shellType: selectedShell)
+
+        if let refreshedConfig = parser.parseConfigFile(at: selectedConfigFile, shellType: selectedShell) {
+            currentConfig = refreshedConfig
+        }
 
         // Generate new content
         let newContent = previewChanges()
 
         // Write to file
-        try writer.writeConfig(newContent, to: selectedConfigFile)
+        try writer.writeConfig(newContent, to: selectedConfigFile, createBackup: configPreviouslyExisted)
 
         // Reload to get fresh state
         loadConfiguration()

@@ -39,6 +39,7 @@ struct ShellSelectorView: View {
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
+                    .accessibilityIdentifier("shell-\(shell.rawValue)-button")
                     .buttonStyle(FloeSelectableChipStyle(isSelected: selectedShell == shell))
                 }
             }
@@ -57,6 +58,7 @@ struct ShellSelectorView: View {
                             Text(displayPath(file)).tag(file)
                         }
                     }
+                    .accessibilityIdentifier("shell-config-picker")
                     .pickerStyle(.menu)
                     .labelsHidden()
 
@@ -64,23 +66,16 @@ struct ShellSelectorView: View {
                 }
                 .padding(.horizontal, 14)
                 .padding(.vertical, 12)
-                .background(
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .fill(FloeTheme.background.opacity(0.92))
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .stroke(FloeTheme.border.opacity(0.75), lineWidth: 1)
-                )
+                .floeGlassField(cornerRadius: 18)
             }
         }
-        .floeCard()
+        .floeCard(fill: FloeTheme.primary.opacity(0.05), border: FloeTheme.border.opacity(0.16), shadow: .soft)
         .onChange(of: selectedShell) { newShell in
             selectedConfigFile = newShell.primaryConfigFile
         }
     }
 
     private func displayPath(_ path: String) -> String {
-        path.replacingOccurrences(of: FileManager.default.homeDirectoryForCurrentUser.path, with: "~")
+        AppEnvironment.displayPath(path)
     }
 }

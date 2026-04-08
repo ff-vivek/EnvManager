@@ -19,5 +19,5 @@ jobs:
         with:
           xcode-version: latest-stable
 
-      - name: Build app
-        run: xcodebuild -project EnvManager.xcodeproj -scheme EnvManager -destination 'platform=macOS' build
+      - name: Build and test app
+        run: xcodebuild -project EnvManager.xcodeproj -scheme EnvManager -destination 'platform=macOS' test
